@@ -1,0 +1,46 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+
+group = 'com.smartcore'
+version = '0.1.0'
+
+configurations {
+    provided
+    testCompile.extendsFrom provided
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.couchbase.client:couchbase-client:1.4.2'
+    provided 'io.dropwizard:dropwizard-core:0.7.1'
+    testCompile "junit:junit:4.11"
+}
+
+sourceSets {
+    main {
+        compileClasspath = compileClasspath + configurations.provided
+    }
+}
+
+plugins.withType(IdeaPlugin) {
+    idea {
+        module {
+            scopes.PROVIDED.plus += configurations.provided
+            scopes.COMPILE.minus += configurations.provided
+            scopes.TEST.minus += configurations.provided
+            scopes.RUNTIME.minus += configurations.provided
+        }
+    }
+}
