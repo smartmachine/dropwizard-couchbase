@@ -16,7 +16,7 @@ public class CouchbaseHealthCheck extends HealthCheck{
     @Override
     protected Result check() throws Exception {
         StringBuilder versionString = new StringBuilder();
-        factory.build().getVersions().entrySet().stream().forEach(version -> {
+        factory.client().getVersions().entrySet().stream().forEach(version -> {
                     if (versionString.length() > 0) {
                         versionString.append("; ");
                     }

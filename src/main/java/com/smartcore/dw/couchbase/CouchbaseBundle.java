@@ -1,13 +1,10 @@
 package com.smartcore.dw.couchbase;
 
-import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public abstract class CouchbaseBundle<T extends Configuration> implements ConfiguredBundle<T> {
-
-    protected abstract CouchbaseClientFactory couchbaseConfiguration(T configuration);
+public class CouchbaseBundle implements ConfiguredBundle<CouchbaseBundleConfiguration> {
 
     private CouchbaseClientFactory factory;
 
@@ -16,8 +13,9 @@ public abstract class CouchbaseBundle<T extends Configuration> implements Config
     }
 
     @Override
-    public final void run(T configuration, Environment environment) throws Exception {
-        factory = couchbaseConfiguration(configuration);
+    public final void run(CouchbaseBundleConfiguration bundleConfig, Environment environment) throws Exception {
+        CouchbaseConfiguration config = bundleConfig.getCouchbaseConfiguration();
+        factory = new CouchbaseClientFactory(config);
         final CouchbaseHealthCheck couchbaseHealthCheck = new CouchbaseHealthCheck(factory);
         environment.lifecycle().manage(factory);
         environment.healthChecks().register("couchbase", couchbaseHealthCheck);
