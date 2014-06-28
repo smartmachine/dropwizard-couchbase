@@ -1,4 +1,4 @@
-package com.smartcore.dw.couchbase;
+package io.smartmachine.dropwizard.couchbase;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package com.smartcore.dw.couchbase;
+package io.smartmachine.dropwizard.couchbase;
 
 import com.couchbase.client.CouchbaseClient;
 import io.dropwizard.lifecycle.Managed;

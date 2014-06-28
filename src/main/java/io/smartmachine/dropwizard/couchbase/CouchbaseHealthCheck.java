@@ -1,4 +1,4 @@
-package com.smartcore.dw.couchbase;
+package io.smartmachine.dropwizard.couchbase;
 
 import com.codahale.metrics.health.HealthCheck;
 
