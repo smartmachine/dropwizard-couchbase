@@ -1,9 +1,9 @@
 package io.smartmachine.dropwizard.couchbase;
 
-import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.smartmachine.dropwizard.couchbase.spi.AccessorProvider;
 
 public class CouchbaseBundle implements ConfiguredBundle<CouchbaseBundleConfiguration> {
 

@@ -1,9 +1,11 @@
-package io.smartmachine.dropwizard.couchbase;
+package io.smartmachine.dropwizard.couchbase.spi;
 
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
+import io.smartmachine.dropwizard.couchbase.Accessor;
+import io.smartmachine.dropwizard.couchbase.CouchbaseClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,23 +39,12 @@ public class AccessorProvider implements InjectableProvider<Accessor, Type> {
             log.info("AccessibleObject: " + ic.getAccesibleObject().toString());
             log.info("Accessor: " + accessor.toString());
             log.info("Type: " + type.getTypeName());
-            log.info("Type: " + type.toString());
             Class<?> accessorClass = ((Field) ic.getAccesibleObject()).getType();
-            Type t = accessorClass.getGenericInterfaces()[0];
-            if ( t instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) t;
-                log.info("Parametrized Type: " + pType);
-                Type[] args = pType.getActualTypeArguments();
-                Class<?> modelClass = (Class<?>) args[0];
-                log.info("ModelClass: " + modelClass);
-                return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{accessorClass},
-                        (proxy, method, args1) -> null);
+            if (accessorClass.equals(CouchbaseClientFactory.class)) {
+                return factory;
             }
-
+            return AccessorFactory.getAccessor(accessorClass, factory);
         };
     }
 
-    private static <E> GenericAccessorImpl<?> getAccessorImpl(Class<E> modelClass, CouchbaseClientFactory factory) {
-        return new GenericAccessorImpl<>(modelClass, factory);
-    }
 }

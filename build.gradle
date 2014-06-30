@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 group = 'io.smartmachine'
 version = '0.1.1'
@@ -8,14 +9,6 @@ version = '0.1.1'
 configurations {
     provided
     testCompile.extendsFrom provided
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
 }
 
 repositories {
@@ -26,6 +19,88 @@ dependencies {
     compile 'com.couchbase.client:couchbase-client:1.4.2'
     provided 'io.dropwizard:dropwizard-core:0.7.1'
     testCompile "junit:junit:4.11"
+    testCompile "org.mockito:mockito-all:1.9.5"
+    testCompile "io.dropwizard:dropwizard-testing:0.7.1"
+}
+
+test {
+
+    include 'io/smartmachine/dropwizard/couchbase/**'
+
+    testLogging.showStandardStreams = true
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + ' produced standard out/err: ' + event.message)
+
+    }
+}
+
+javadoc {
+    classpath = configurations.compile + configurations.provided
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from "build/docs/javadoc"
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    // sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment)}
+            repository(url: "file:///$projectDir/artifacts")
+            //repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            //    authentication(userName: sonatypeUser, password: sonatypePassword)
+            //}
+
+            pom.project {
+                name 'dropwizard-couchbase'
+                packaging 'jar'
+                description 'Couchbase persistence module for dropwizard.'
+                url 'http://smartmachine.io/dropwizard-couchbase'
+
+                scm {
+                    url 'scm:git@github.com:smartmachine/dropwizard-smartmachine.git'
+                    connection 'scm:git@github.com:smartmachine/dropwizard-smartmachine.git'
+                    developerConnection 'scm:git@github.com:smartmachine/dropwizard-smartmachine.git'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'http://www.opensource.org/licenses/mit-license.php'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'knutster'
+                        name 'Conrad Christensen'
+                    }
+                }
+            }
+        }
+    }
 }
 
 sourceSets {
