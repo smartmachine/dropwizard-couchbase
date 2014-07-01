@@ -1,4 +1,4 @@
-package io.smartmachine.dropwizard.couchbase;
+package io.smartmachine.couchbase;
 
 public interface GenericAccessor<T>  {
 

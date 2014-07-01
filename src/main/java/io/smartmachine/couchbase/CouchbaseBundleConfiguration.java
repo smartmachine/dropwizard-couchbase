@@ -1,10 +1,10 @@
-package io.smartmachine.dropwizard.couchbase;
+package io.smartmachine.couchbase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface CouchbaseBundleConfiguration {
 
-    @JsonProperty
+    @JsonProperty("couchbase")
     public CouchbaseConfiguration getCouchbaseConfiguration();
 
 }

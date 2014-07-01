@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group = 'io.smartmachine'
-version = '0.1.1'
+version = '0.2.0'
 
 configurations {
     provided
@@ -19,24 +19,24 @@ dependencies {
     compile 'com.couchbase.client:couchbase-client:1.4.2'
     provided 'io.dropwizard:dropwizard-core:0.7.1'
     testCompile "junit:junit:4.11"
-    testCompile "org.mockito:mockito-all:1.9.5"
+    testCompile "org.mockito:mockito-core:1.9.5"
     testCompile "io.dropwizard:dropwizard-testing:0.7.1"
 }
 
 test {
 
-    include 'io/smartmachine/dropwizard/couchbase/**'
+    // include 'io/smartmachine/dropwizard/couchbase/**'
 
     testLogging.showStandardStreams = true
+    testLogging.showExceptions = true
+    testLogging.showStackTraces = true
+    testLogging.showCauses = true
+    testLogging.setDisplayGranularity(-1)
 
     beforeTest { descriptor ->
         logger.lifecycle("Running test: " + descriptor)
     }
 
-    onOutput { descriptor, event ->
-        logger.lifecycle("Test: " + descriptor + ' produced standard out/err: ' + event.message)
-
-    }
 }
 
 javadoc {
@@ -60,17 +60,17 @@ artifacts {
 }
 
 signing {
-    // sign configurations.archives
+    sign configurations.archives
 }
 
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment)}
-            repository(url: "file:///$projectDir/artifacts")
-            //repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            //    authentication(userName: sonatypeUser, password: sonatypePassword)
-            //}
+            //repository(url: "file:///$projectDir/artifacts")
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUser, password: sonatypePassword)
+            }
 
             pom.project {
                 name 'dropwizard-couchbase'

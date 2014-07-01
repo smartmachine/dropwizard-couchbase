@@ -1,9 +1,9 @@
-package io.smartmachine.dropwizard.couchbase;
+package io.smartmachine.couchbase;
 
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.smartmachine.dropwizard.couchbase.spi.AccessorProvider;
+import io.smartmachine.couchbase.spi.AccessorProvider;
 
 public class CouchbaseBundle implements ConfiguredBundle<CouchbaseBundleConfiguration> {
 

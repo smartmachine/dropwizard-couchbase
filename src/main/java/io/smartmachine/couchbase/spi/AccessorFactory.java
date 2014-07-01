@@ -1,6 +1,6 @@
-package io.smartmachine.dropwizard.couchbase.spi;
+package io.smartmachine.couchbase.spi;
 
-import io.smartmachine.dropwizard.couchbase.CouchbaseClientFactory;
+import io.smartmachine.couchbase.CouchbaseClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,11 @@
-package io.smartmachine.dropwizard.couchbase.spi;
+package io.smartmachine.couchbase.spi;
 
 
+import com.couchbase.client.protocol.views.Query;
+import com.couchbase.client.protocol.views.View;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smartmachine.dropwizard.couchbase.CouchbaseClientFactory;
-import io.smartmachine.dropwizard.couchbase.GenericAccessor;
+import io.smartmachine.couchbase.CouchbaseClientFactory;
+import io.smartmachine.couchbase.GenericAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,10 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
 
     @Override
     public List<T> executeFinder(Method method, Object[] queryArgs) {
+        View view = factory.client().getView(type.getSimpleName().toUpperCase(), method.getName());
+        Query query = new Query();
+        query.setIncludeDocs(true);
+
         throw new IllegalStateException("Finder methods not implemented yet.");
     }
 

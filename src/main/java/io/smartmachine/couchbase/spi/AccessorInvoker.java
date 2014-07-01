@@ -1,4 +1,4 @@
-package io.smartmachine.dropwizard.couchbase.spi;
+package io.smartmachine.couchbase.spi;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

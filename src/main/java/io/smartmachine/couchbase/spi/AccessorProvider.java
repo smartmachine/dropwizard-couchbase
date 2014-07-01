@@ -1,11 +1,11 @@
-package io.smartmachine.dropwizard.couchbase.spi;
+package io.smartmachine.couchbase.spi;
 
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
-import io.smartmachine.dropwizard.couchbase.Accessor;
-import io.smartmachine.dropwizard.couchbase.CouchbaseClientFactory;
+import io.smartmachine.couchbase.Accessor;
+import io.smartmachine.couchbase.CouchbaseClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
