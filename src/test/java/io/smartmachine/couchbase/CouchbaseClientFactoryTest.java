@@ -1,8 +1,8 @@
 package io.smartmachine.couchbase;
 
 
-import com.couchbase.client.protocol.views.DesignDocument;
-import com.couchbase.client.protocol.views.ViewDesign;
+import io.smartmachine.couchbase.api.TestAccessor;
+import io.smartmachine.couchbase.spi.AccessorFactory;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +25,19 @@ public class CouchbaseClientFactoryTest {
         conf.setPassword("goliath");
         CouchbaseClientFactory factory = new CouchbaseClientFactory(conf);
         factory.start();
-        DesignDocument doc = new DesignDocument("DEVICE");
-        ViewDesign design = new ViewDesign("findAll", "function (doc, meta) {\n" +
-                "  if ((/^DEVICE/).test(meta.id)) {\n" +
-                "    emit(meta.id, null);\n" +
-                "  }\n" +
-                "}");
-        doc.setView(design);
-        factory.client().createDesignDoc(doc);
-        factory.client().getView("DEVICE", "123");
+        /**
+         DesignDocument doc = new DesignDocument("DEVICE");
+         ViewDesign design = new ViewDesign("findAll", "function (doc, meta) {\n" +
+         "  if ((/^DEVICE/).test(meta.id)) {\n" +
+         "    emit(meta.id, null);\n" +
+         "  }\n" +
+         "}");
+         doc.setView(design);
+         factory.client().createDesignDoc(doc);
+         factory.client().getView("DEVICE", "123");
+         */
+        TestAccessor ta = AccessorFactory.getAccessor(TestAccessor.class, factory);
+        ta.findAll();
     }
 
 

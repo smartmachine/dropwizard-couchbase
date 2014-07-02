@@ -8,7 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 
-final class AccessorFactory {
+public class AccessorFactory {
 
     private static Logger log = LoggerFactory.getLogger(AccessorFactory.class);
 

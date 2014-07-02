@@ -25,7 +25,7 @@ dependencies {
 
 test {
 
-    // include 'io/smartmachine/dropwizard/couchbase/**'
+    outputs.upToDateWhen { false }
 
     testLogging.showStandardStreams = true
     testLogging.showExceptions = true
@@ -36,6 +36,8 @@ test {
     beforeTest { descriptor ->
         logger.lifecycle("Running test: " + descriptor)
     }
+
+    systemProperty 'net.spy.log.LoggerImpl', 'net.spy.memcached.compat.log.SLF4JLogger'
 
 }
 
