@@ -20,16 +20,18 @@ public class AccessorFactory {
             ParameterizedType pType = (ParameterizedType) type;
             log.info("Parameterized Type: " + pType.toString());
             Type[] args = pType.getActualTypeArguments();
-            Class<?> accessorClass = (Class<?>) args[0];
-            log.info("Accessor Class: " + accessorClass.toString());
+            Class<?> modelClass = (Class<?>) args[0];
+            log.info("Accessor Class: " + modelClass.toString());
             return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] {t},
-                    new AccessorInvoker(getAccessorImpl(accessorClass, factory)));
+                    new AccessorInvoker(getAccessorImpl(modelClass, t, factory)));
         }
         throw new IllegalArgumentException("Your accessor interface has to extend GenericAccessor<ModelClass>");
     }
 
-    private static <E> GenericAccessorImpl<?> getAccessorImpl(Class<E> accessorClass, CouchbaseClientFactory factory) {
-        return new GenericAccessorImpl<>(accessorClass, factory);
+    private static <E, T> GenericAccessorImpl<?> getAccessorImpl(Class<E> modelClass, Class<T> accessorClass, CouchbaseClientFactory factory) {
+        GenericAccessorImpl<E> impl = new GenericAccessorImpl<>(modelClass, factory);
+        impl.cacheViews(accessorClass);
+        return impl;
     }
 
 }

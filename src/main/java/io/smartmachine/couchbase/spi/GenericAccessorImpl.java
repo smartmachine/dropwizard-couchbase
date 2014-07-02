@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecutor<T> {
 
@@ -20,6 +22,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
 
     final private Class<T> type;
     final private CouchbaseClientFactory factory;
+    private Map<String, View> views;
 
     public GenericAccessorImpl(Class<T> type, CouchbaseClientFactory factory) {
         this.type = type;
@@ -57,9 +60,13 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public List<T> executeFinder(Method method, Object[] queryArgs) {
         List<T> list = new ArrayList<>();
-        View view = getOrCreateView(method);
+        View view = views.get(method.getName());
+        if (view == null) {
+            throw new IllegalStateException("You must annotate your Accessor interface method with ViewQuery!");
+        }
         Query query = new Query();
         query.setIncludeDocs(true);
+        query.setStale(Stale.FALSE);
         ViewResponse response = factory.client().query(view, query);
         ObjectMapper mapper = new ObjectMapper();
         for (ViewRow row : response) {
@@ -73,7 +80,21 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         return list;
     }
 
-    private View getOrCreateView(Method method) {
+    public void cacheViews(Class accessorClass) {
+        views = new HashMap<>();
+        log.info("Scanning " + accessorClass.getName() +" for ViewQuery annotated methods ...");
+        for (Method method : accessorClass.getMethods()) {
+            ViewQuery vq = method.getDeclaredAnnotation(ViewQuery.class);
+            if (vq == null) {
+                continue;
+            }
+            View view = getOrCreateView(method, vq);
+            log.info("Caching view: " + view.getViewName());
+            views.put(method.getName(),  getOrCreateView(method, vq));
+        }
+    }
+
+    private View getOrCreateView(Method method, ViewQuery vq) {
         // Construct the document and view names.
         // TODO Pluggable naming strategies??
         String docName = type.getSimpleName().toUpperCase();
@@ -82,24 +103,21 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         try {
             return factory.client().getView(docName, viewName);
         } catch (InvalidViewException e) {
-            log.info("View does not exist.");
+            log.info("View " + viewName + " does not exist, creating it.");
         }
         DesignDocument doc = null;
         try {
             doc = factory.client().getDesignDoc(docName);
         } catch (Exception e) {
+            log.info("Design document " + docName + " does not exist, creating it.");
             doc = new DesignDocument(docName);
-        }
-        ViewQuery vq = method.getDeclaredAnnotation(ViewQuery.class);
-        if (vq == null) {
-            throw new IllegalStateException("Your finder method must be annotated with ViewQuery");
         }
         StringBuilder mapBuilder = new StringBuilder();
         mapBuilder.append("function (doc, meta) {\n")
                 .append("  if (")
                 .append(vq.value())
                 .append(") {\n")
-                .append("    emit(meta.id, null);\n")
+                .append("    ").append(vq.emit()).append(";\n")
                 .append("  }\n")
                 .append("}");
         ViewDesign viewDesign = new ViewDesign(viewName, mapBuilder.toString());

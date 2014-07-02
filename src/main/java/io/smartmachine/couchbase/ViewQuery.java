@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 public @interface ViewQuery {
 
     public String value();
+    public String emit() default "emit(meta.id, null)";
 
 }
