@@ -47,7 +47,7 @@ tasks.withType(Test) {
     testLogging.showExceptions = true
     testLogging.showStackTraces = true
     testLogging.showCauses = true
-    testLogging.setDisplayGranularity(-1)
+    testLogging.exceptionFormat = "full"
 
     beforeTest { descriptor ->
         logger.lifecycle("Running test: " + descriptor)
@@ -88,7 +88,6 @@ uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment)}
-            //repository(url: "file:///$projectDir/artifacts")
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 authentication(userName: sonatypeUser, password: sonatypePassword)
             }

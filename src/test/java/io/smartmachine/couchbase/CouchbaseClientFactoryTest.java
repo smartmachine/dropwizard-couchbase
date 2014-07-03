@@ -3,6 +3,7 @@ package io.smartmachine.couchbase;
 
 import io.smartmachine.couchbase.api.TestAccessor;
 import io.smartmachine.couchbase.spi.AccessorFactory;
+import io.smartmachine.couchbase.spi.AccessorFactoryTest;
 import io.smartmachine.couchbase.test.IntegrationTests;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -16,7 +17,7 @@ import java.util.List;
 @Category(IntegrationTests.class)
 public class CouchbaseClientFactoryTest {
 
-    private static Logger log = LoggerFactory.getLogger(FooTest.class);
+    private static Logger log = LoggerFactory.getLogger(AccessorFactoryTest.class);
 
     @Test
     public void clientTest() throws Exception {
