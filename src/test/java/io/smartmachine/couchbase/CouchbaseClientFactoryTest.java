@@ -3,7 +3,9 @@ package io.smartmachine.couchbase;
 
 import io.smartmachine.couchbase.api.TestAccessor;
 import io.smartmachine.couchbase.spi.AccessorFactory;
+import io.smartmachine.couchbase.test.IntegrationTests;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+@Category(IntegrationTests.class)
 public class CouchbaseClientFactoryTest {
 
     private static Logger log = LoggerFactory.getLogger(FooTest.class);

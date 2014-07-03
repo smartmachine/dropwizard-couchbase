@@ -23,7 +23,19 @@ dependencies {
     testCompile "io.dropwizard:dropwizard-testing:0.7.1"
 }
 
+task integrationTest(type: Test) {
+    useJUnit {
+        includeCategories 'io.smartmachine.couchbase.test.IntegrationTests'
+    }
+}
+
 test {
+    useJUnit {
+        includeCategories 'io.smartmachine.couchbase.test.UnitTests'
+    }
+}
+
+tasks.withType(Test) {
 
     outputs.upToDateWhen { false }
 
