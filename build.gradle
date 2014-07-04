@@ -1,12 +1,22 @@
-import java.text.Bidi
-
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'jacoco'
+apply plugin: 'coveralls'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.6.0'
+    }
+}
 
 group = 'io.smartmachine'
-version = '0.2.1'
+version = '0.2.2'
 
 ext.signRelease = !("$System.env.TRAVIS" == "true")
 
@@ -20,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.couchbase.client:couchbase-client:1.4.2'
+    compile 'com.couchbase.client:couchbase-client:1.4.3'
     provided 'io.dropwizard:dropwizard-core:0.7.1'
     testCompile "junit:junit:4.11"
     testCompile "org.mockito:mockito-core:1.9.5"
@@ -55,6 +65,17 @@ tasks.withType(Test) {
 
     systemProperty 'net.spy.log.LoggerImpl', 'net.spy.memcached.compat.log.SLF4JLogger'
 
+}
+
+jacoco {
+    toolVersion = "0.7.0.201403182114"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
 }
 
 javadoc {

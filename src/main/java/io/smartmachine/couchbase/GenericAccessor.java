@@ -2,9 +2,10 @@ package io.smartmachine.couchbase;
 
 public interface GenericAccessor<T>  {
 
-    void create(T newinstance);
+    void create(String id, T newinstance);
     T read(String id);
-    T update(T object);
-    void delete(T object);
+    void update(String id, T object);
+    void delete(String id);
+    void set(String id, T object);
 
 }

@@ -2,22 +2,24 @@ package io.smartmachine.couchbase.spi;
 
 
 import com.couchbase.client.CouchbaseClient;
-import com.couchbase.client.protocol.views.*;
+import com.couchbase.client.protocol.views.View;
+import com.couchbase.client.protocol.views.ViewResponse;
+import com.couchbase.client.protocol.views.ViewRow;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.GenericAccessor;
 import io.smartmachine.couchbase.api.TestAccessor;
 import io.smartmachine.couchbase.test.UnitTests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,8 +27,10 @@ import static org.mockito.Mockito.when;
 @Category(UnitTests.class)
 public class AccessorFactoryTest {
 
-    private static Logger log = LoggerFactory.getLogger(AccessorFactoryTest.class);
     private CouchbaseClientFactory factory;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -41,11 +45,17 @@ public class AccessorFactoryTest {
 
 
     @Test
-    public void testAccessorFactory() {
+    public void testReturnAccessor() {
         TestAccessor accessor = AccessorFactory.getAccessor(TestAccessor.class, factory);
         assertThat(accessor, is(notNullValue()));
-        assertThat(accessor, instanceOf(GenericAccessor.class));
+        assertThat(accessor, isA(GenericAccessor.class));
         assertThat(accessor.findAll(), instanceOf(List.class));
+    }
+
+    @Test
+    public void testReturnFailure() {
+        exception.expect(IllegalArgumentException.class);
+        AccessorFactory.getAccessor(String.class, factory);
     }
 
 }

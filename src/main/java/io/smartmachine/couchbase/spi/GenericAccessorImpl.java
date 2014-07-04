@@ -2,7 +2,9 @@ package io.smartmachine.couchbase.spi;
 
 
 import com.couchbase.client.protocol.views.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.dropwizard.jackson.Jackson;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.GenericAccessor;
 import io.smartmachine.couchbase.ViewQuery;
@@ -23,38 +25,65 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     final private Class<T> type;
     final private CouchbaseClientFactory factory;
     private Map<String, View> views;
+    private ObjectMapper mapper = Jackson.newObjectMapper();
 
     public GenericAccessorImpl(Class<T> type, CouchbaseClientFactory factory) {
         this.type = type;
         this.factory = factory;
     }
 
+    private T deserialize(Object json) {
+        try {
+            return mapper.readValue((String) json, type);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot convert JSON: " + json + " to " + type.getSimpleName());
+        }
+    }
+
+    private String serialize(T object) {
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Cannot convert " + type.getSimpleName() + " to JSON.", e);
+        }
+    }
+
     @Override
-    public void create(T newinstance) {
-        log.info("Create: "+ type.getSimpleName());
+    public void create(String id, T newinstance) {
+        log.info("Create: " + type.getSimpleName());
+        factory.client().add(makeKey(id), serialize(newinstance)).addListener(future ->
+                        log.info("Create status: " + future.getStatus())
+        );
     }
 
     @Override
     public T read(String id) {
         log.info("Reading : " + type.getSimpleName());
-        String json = (String) factory.client().get(makeKey(id));
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.readValue(json, type);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot convert JSON to " + type.getSimpleName());
-        }
+        return deserialize(factory.client().get(makeKey(id)));
     }
 
     @Override
-    public T update(T object) {
+    public void update(String id, T object) {
         log.info("Updating: " + type.getSimpleName());
-        return null;
+        factory.client().replace(makeKey(id), serialize(object)).addListener(future ->
+                        log.info("Update status: " + future.getStatus())
+        );
     }
 
     @Override
-    public void delete(T object) {
+    public void delete(String id) {
         log.info("Delete: " + type.getSimpleName());
+        factory.client().delete(makeKey(id)).addListener(future ->
+                        log.info("Delete status: " + future.getStatus())
+        );
+    }
+
+    @Override
+    public void set(String id, T object) {
+        log.info("Set: " + type.getSimpleName());
+        factory.client().set(makeKey(id), object).addListener(future ->
+                        log.info("Set status: " + future.getStatus())
+        );
     }
 
     @Override
