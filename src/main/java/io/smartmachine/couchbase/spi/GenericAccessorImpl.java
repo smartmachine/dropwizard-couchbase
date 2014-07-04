@@ -33,6 +33,9 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     }
 
     private T deserialize(Object json) {
+        if (json == null) {
+            return null;
+        }
         try {
             return mapper.readValue((String) json, type);
         } catch (IOException e) {
