@@ -5,9 +5,9 @@ import io.smartmachine.couchbase.ViewQuery;
 
 import java.util.List;
 
-public interface TestAccessor extends GenericAccessor<Test> {
+public interface TesterAccessor extends GenericAccessor<Tester> {
 
     @ViewQuery("(/^TEST/).test(meta.id)")
-    List<Test> findAll();
+    List<Tester> findAll();
 
 }

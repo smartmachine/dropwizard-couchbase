@@ -2,7 +2,6 @@ package io.smartmachine.couchbase;
 
 import com.codahale.metrics.health.HealthCheck;
 
-
 import java.net.InetSocketAddress;
 
 public class CouchbaseHealthCheck extends HealthCheck{

@@ -6,14 +6,14 @@ import io.smartmachine.couchbase.spi.GenericAccessorImpl;
 
 import java.util.List;
 
-public class TestAccessorImpl extends GenericAccessorImpl<Test> implements TestAccessor {
+public class TesterAccessorImpl extends GenericAccessorImpl<Tester> implements TesterAccessor {
 
-    public TestAccessorImpl(Class<Test> type, CouchbaseClientFactory factory) {
+    public TesterAccessorImpl(Class<Tester> type, CouchbaseClientFactory factory) {
         super(type, factory);
     }
 
     @Override
-    public List<Test> findAll() {
+    public List<Tester> findAll() {
         return null;
     }
 

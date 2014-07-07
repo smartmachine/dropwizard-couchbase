@@ -22,13 +22,7 @@ public class AccessorInvoker implements InvocationHandler {
                 return method.invoke(executor, args);
             }
         }
-        Class<?>[] interfaces = proxy.getClass().getInterfaces();
-        if (interfaces.length > 0) {
-            throw new IllegalArgumentException("Unable to match method " + method.getName() + " to interface "
-                    + interfaces[0].getName() + ".");
-        } else {
-            throw new IllegalArgumentException("Unable to match method " + method.getName() + " to your DAO interface");
-        }
+        throw new IllegalArgumentException("Unable to match method " + method.getName() + " to your DAO interface");
     }
 
 }

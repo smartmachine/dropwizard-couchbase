@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
 @Provider
 public class AccessorProvider implements InjectableProvider<Accessor, Type> {

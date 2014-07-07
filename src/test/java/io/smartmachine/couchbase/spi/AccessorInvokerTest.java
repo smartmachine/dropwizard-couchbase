@@ -1,47 +1,65 @@
 package io.smartmachine.couchbase.spi;
 
-import io.smartmachine.couchbase.CouchbaseClientFactory;
-
-import io.smartmachine.couchbase.api.TestAccessor;
-import io.smartmachine.couchbase.api.TestAccessorImpl;
+import io.smartmachine.couchbase.api.Tester;
+import io.smartmachine.couchbase.api.TesterAccessor;
+import io.smartmachine.couchbase.api.TesterAccessorBroken;
 import io.smartmachine.couchbase.test.UnitTests;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Proxy;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.isA;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.mockito.Mockito.mock;
+import java.lang.reflect.Method;
 
 @Category(UnitTests.class)
 public class AccessorInvokerTest {
 
     private static Logger log = LoggerFactory.getLogger(AccessorInvokerTest.class);
 
-    private TestAccessor accessor;
-    private CouchbaseClientFactory factory;
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Mock
+    private GenericAccessorImpl<Tester> accessor;
+
+    private Method TO_STRING;
+    private Method FIND_ALL;
+    private Method GET_ALL;
+
+
+    private AccessorInvoker invoker;
+    private Class[] NO_ARGS = new Class[] {};
+
 
     @Before
-    public void setup() {
-        factory = mock(CouchbaseClientFactory.class);
-        accessor = (TestAccessor) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{io.smartmachine.couchbase.api.TestAccessor.class},
-                new AccessorInvoker(mock(GenericAccessorImpl.class)));
+    public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        invoker = new AccessorInvoker(accessor);
+
+        TO_STRING = Object.class.getMethod("toString");
+        FIND_ALL = TesterAccessor.class.getMethod("findAll");
+        GET_ALL = TesterAccessorBroken.class.getMethod("getAll");
     }
 
     @Test
-    public void testProxy() {
-        assertThat(accessor, isA(TestAccessor.class));
+    public void testFallThrough() throws Throwable {
+        invoker.invoke(accessor, TO_STRING, NO_ARGS);
     }
 
     @Test
-    public void testFallThrough() {
-        log.info("Accessor object: " + accessor.toString());
-        accessor.findAll();
+    public void testFinder() throws Throwable {
+        invoker.invoke(accessor, FIND_ALL, NO_ARGS);
+    }
+
+    @Test
+    public void testFunk() throws Throwable {
+        exception.expect(IllegalArgumentException.class);
+        invoker.invoke(accessor, GET_ALL, NO_ARGS);
     }
 
 

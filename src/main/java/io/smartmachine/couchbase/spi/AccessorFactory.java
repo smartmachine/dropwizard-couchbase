@@ -8,9 +8,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 
-public class AccessorFactory {
+final class AccessorFactory {
 
     private static Logger log = LoggerFactory.getLogger(AccessorFactory.class);
+
+    private AccessorFactory() {}
 
     @SuppressWarnings("unchecked")
     public static <T> T getAccessor(Class<T> t, CouchbaseClientFactory factory) {

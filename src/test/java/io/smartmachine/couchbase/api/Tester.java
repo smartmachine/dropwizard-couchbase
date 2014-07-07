@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
-public class Test {
+public class Tester {
 
     @NotEmpty
     private final String name;
@@ -13,7 +13,7 @@ public class Test {
     private final String someOtherProperty;
 
     @JsonCreator
-    public Test(@JsonProperty("name") String name, @JsonProperty("other") String someOtherProperty) {
+    public Tester(@JsonProperty("name") String name, @JsonProperty("other") String someOtherProperty) {
         this.name = name;
         this.someOtherProperty = someOtherProperty;
     }

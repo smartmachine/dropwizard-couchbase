@@ -7,7 +7,7 @@ import com.couchbase.client.protocol.views.ViewResponse;
 import com.couchbase.client.protocol.views.ViewRow;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.GenericAccessor;
-import io.smartmachine.couchbase.api.TestAccessor;
+import io.smartmachine.couchbase.api.TesterAccessor;
 import io.smartmachine.couchbase.test.UnitTests;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class AccessorFactoryTest {
         CouchbaseClient client = mock(CouchbaseClient.class);
         ViewResponse response = mock(ViewResponse.class);
         when(factory.client()).thenReturn(client);
-        when(client.getView("TEST", "findAll")).thenReturn(new View("", "", "findAll", false, false));
+        when(client.getView("TESTER", "findAll")).thenReturn(new View("", "", "findAll", false, false));
         when(client.query(any(), any())).thenReturn(response);
         when(response.iterator()).thenReturn(new ArrayList<ViewRow>().iterator());
     }
@@ -46,7 +47,7 @@ public class AccessorFactoryTest {
 
     @Test
     public void testReturnAccessor() {
-        TestAccessor accessor = AccessorFactory.getAccessor(TestAccessor.class, factory);
+        TesterAccessor accessor = AccessorFactory.getAccessor(TesterAccessor.class, factory);
         assertThat(accessor, is(notNullValue()));
         assertThat(accessor, isA(GenericAccessor.class));
         assertThat(accessor.findAll(), instanceOf(List.class));
@@ -56,6 +57,13 @@ public class AccessorFactoryTest {
     public void testReturnFailure() {
         exception.expect(IllegalArgumentException.class);
         AccessorFactory.getAccessor(String.class, factory);
+    }
+
+    @Test
+    public void testConstructor() throws Exception {
+        Constructor<AccessorFactory> constructor = AccessorFactory.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        constructor.newInstance();
     }
 
 }

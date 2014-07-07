@@ -60,7 +60,7 @@ tasks.withType(Test) {
     testLogging.exceptionFormat = "full"
 
     beforeTest { descriptor ->
-        logger.lifecycle("Running test: " + descriptor)
+        logger.lifecycle("\n* Running test: " + descriptor)
     }
 
     systemProperty 'net.spy.log.LoggerImpl', 'net.spy.memcached.compat.log.SLF4JLogger'
@@ -68,7 +68,7 @@ tasks.withType(Test) {
 }
 
 jacoco {
-    toolVersion = "0.7.0.201403182114"
+    toolVersion = "0.7.1.201405082137"
 }
 
 jacocoTestReport {
