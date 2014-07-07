@@ -1,6 +1,7 @@
 package io.smartmachine.couchbase.spi;
 
 
+import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.protocol.views.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +24,13 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     private static Logger log = LoggerFactory.getLogger(GenericAccessorImpl.class);
 
     final private Class<T> type;
-    final private CouchbaseClientFactory factory;
-    private Map<String, View> views;
+    final private CouchbaseClient client;
+    private Map<String, View>  views = new HashMap<>();
     private ObjectMapper mapper = Jackson.newObjectMapper();
 
     public GenericAccessorImpl(Class<T> type, CouchbaseClientFactory factory) {
         this.type = type;
-        this.factory = factory;
+        this.client = factory.client();
     }
 
     private T deserialize(Object json) {
@@ -54,7 +55,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public void create(String id, T newinstance) {
         log.info("Create: " + type.getSimpleName());
-        factory.client().add(makeKey(id), serialize(newinstance)).addListener(future ->
+        client.add(makeKey(id), serialize(newinstance)).addListener(future ->
                         log.info("Create status: " + future.getStatus())
         );
     }
@@ -62,13 +63,13 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public T read(String id) {
         log.info("Reading : " + type.getSimpleName());
-        return deserialize(factory.client().get(makeKey(id)));
+        return deserialize(client.get(makeKey(id)));
     }
 
     @Override
     public void update(String id, T object) {
         log.info("Updating: " + type.getSimpleName());
-        factory.client().replace(makeKey(id), serialize(object)).addListener(future ->
+        client.replace(makeKey(id), serialize(object)).addListener(future ->
                         log.info("Update status: " + future.getStatus())
         );
     }
@@ -76,7 +77,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public void delete(String id) {
         log.info("Delete: " + type.getSimpleName());
-        factory.client().delete(makeKey(id)).addListener(future ->
+        client.delete(makeKey(id)).addListener(future ->
                         log.info("Delete status: " + future.getStatus())
         );
     }
@@ -84,7 +85,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public void set(String id, T object) {
         log.info("Set: " + type.getSimpleName());
-        factory.client().set(makeKey(id), object).addListener(future ->
+        client.set(makeKey(id), serialize(object)).addListener(future ->
                         log.info("Set status: " + future.getStatus())
         );
     }
@@ -99,7 +100,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         Query query = new Query();
         query.setIncludeDocs(true);
         query.setStale(Stale.FALSE);
-        ViewResponse response = factory.client().query(view, query);
+        ViewResponse response = client.query(view, query);
         ObjectMapper mapper = new ObjectMapper();
         for (ViewRow row : response) {
             String json = (String) row.getDocument();
@@ -113,7 +114,7 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     }
 
     public void cacheViews(Class accessorClass) {
-        views = new HashMap<>();
+        views.clear();
         log.info("Scanning " + accessorClass.getName() +" for ViewQuery annotated methods ...");
         for (Method method : accessorClass.getMethods()) {
             ViewQuery vq = method.getDeclaredAnnotation(ViewQuery.class);
@@ -133,14 +134,14 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         String viewName = method.getName();
 
         try {
-            return factory.client().getView(docName, viewName);
+            return client.getView(docName, viewName);
         } catch (InvalidViewException e) {
             log.info("View " + viewName + " does not exist, creating it.");
         }
-        DesignDocument doc = null;
+        DesignDocument doc;
         try {
-            doc = factory.client().getDesignDoc(docName);
-        } catch (Exception e) {
+            doc = client.getDesignDoc(docName);
+        } catch (InvalidViewException e) {
             log.info("Design document " + docName + " does not exist, creating it.");
             doc = new DesignDocument(docName);
         }
@@ -154,8 +155,8 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
                 .append("}");
         ViewDesign viewDesign = new ViewDesign(viewName, mapBuilder.toString());
         doc.setView(viewDesign);
-        factory.client().createDesignDoc(doc);
-        return factory.client().getView(docName, viewName);
+        client.createDesignDoc(doc);
+        return client.getView(docName, viewName);
     }
 
     private String makeKey(String id) {
