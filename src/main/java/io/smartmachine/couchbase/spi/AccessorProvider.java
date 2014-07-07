@@ -20,9 +20,15 @@ public class AccessorProvider implements InjectableProvider<Accessor, Type> {
     private static Logger log = LoggerFactory.getLogger(AccessorProvider.class);
 
     final private CouchbaseClientFactory factory;
+    private AccessorFactory af = AccessorFactory.getFactory();
 
     public AccessorProvider(CouchbaseClientFactory factory) {
         this.factory = factory;
+    }
+
+    AccessorProvider(AccessorFactory af, CouchbaseClientFactory factory) {
+        this(factory);
+        this.af = af;
     }
 
     @Override
@@ -44,7 +50,7 @@ public class AccessorProvider implements InjectableProvider<Accessor, Type> {
             if (accessorClass.equals(CouchbaseClientFactory.class)) {
                 return factory;
             }
-            return AccessorFactory.getAccessor(accessorClass, factory);
+            return af.getAccessor(accessorClass, factory);
         };
     }
 

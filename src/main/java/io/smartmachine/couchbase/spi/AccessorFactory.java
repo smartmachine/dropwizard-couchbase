@@ -8,14 +8,20 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 
-final class AccessorFactory {
+class AccessorFactory {
 
     private static Logger log = LoggerFactory.getLogger(AccessorFactory.class);
 
     private AccessorFactory() {}
 
+    private static AccessorFactory factory = new AccessorFactory();
+
+    public static AccessorFactory getFactory() {
+        return factory;
+    }
+
     @SuppressWarnings("unchecked")
-    public static <T> T getAccessor(Class<T> t, CouchbaseClientFactory factory) {
+    public <T> T getAccessor(Class<T> t, CouchbaseClientFactory factory) {
         log.info("DAO class name: " + t.getName());
         Type type = t.getGenericInterfaces()[0];
         if (type instanceof ParameterizedType) {
@@ -30,7 +36,7 @@ final class AccessorFactory {
         throw new IllegalArgumentException("Your accessor interface has to extend GenericAccessor<ModelClass>");
     }
 
-    private static <E, T> GenericAccessorImpl<?> getAccessorImpl(Class<E> modelClass, Class<T> accessorClass, CouchbaseClientFactory factory) {
+    private <E, T> GenericAccessorImpl<?> getAccessorImpl(Class<E> modelClass, Class<T> accessorClass, CouchbaseClientFactory factory) {
         GenericAccessorImpl<E> impl = new GenericAccessorImpl<>(modelClass, factory);
         impl.cacheViews(accessorClass);
         return impl;

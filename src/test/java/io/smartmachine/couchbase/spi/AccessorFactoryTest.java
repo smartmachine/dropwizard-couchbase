@@ -47,7 +47,7 @@ public class AccessorFactoryTest {
 
     @Test
     public void testReturnAccessor() {
-        TesterAccessor accessor = AccessorFactory.getAccessor(TesterAccessor.class, factory);
+        TesterAccessor accessor = AccessorFactory.getFactory().getAccessor(TesterAccessor.class, factory);
         assertThat(accessor, is(notNullValue()));
         assertThat(accessor, isA(GenericAccessor.class));
         assertThat(accessor.findAll(), instanceOf(List.class));
@@ -56,7 +56,7 @@ public class AccessorFactoryTest {
     @Test
     public void testReturnFailure() {
         exception.expect(IllegalArgumentException.class);
-        AccessorFactory.getAccessor(String.class, factory);
+        AccessorFactory.getFactory().getAccessor(String.class, factory);
     }
 
     @Test
