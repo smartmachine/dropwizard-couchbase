@@ -35,3 +35,36 @@ or pom.xml
   </dependencies>
 </project>
 ```
+Add a CouchbaseBundle to your Application class:
+``` java
+package io.sample;
+
+import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+import io.smartmachine.couchbase.CouchbaseBundle;
+
+public class ConfigurationServer extends Application<ConfigurationServerConfig> {
+
+    public static void main(String[] args) throws Exception {
+        new ConfigurationServer().run(args);
+    }
+
+    private final CouchbaseBundle couchbaseBundle = new CouchbaseBundle();
+
+    @Override
+    public void initialize(Bootstrap<ConfigurationServerConfig> bootstrap) {
+        bootstrap.addBundle(couchbaseBundle);
+    }
+
+    @Override
+    public void run(ConfigurationServerConfig configuration, Environment environment) throws Exception {
+        // Register all your resources here as usual
+    }
+
+    @Override
+    public String getName() {
+        return "configuration-server";
+    }
+}
+```
