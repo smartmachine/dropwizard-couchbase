@@ -35,7 +35,7 @@ or pom.xml
   </dependencies>
 </project>
 ```
-Add a CouchbaseBundle to your Application class:
+Add a `CouchbaseBundle` to your `Application` class:
 ``` java
 package io.sample;
 
@@ -65,6 +65,41 @@ public class ConfigurationServer extends Application<ConfigurationServerConfig> 
     @Override
     public String getName() {
         return "configuration-server";
+    }
+}
+```
+Implement `CouchbaseBundleConfiguration` in your configuration class.
+``` java
+package io.smartmachine.cs;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
+import io.smartmachine.couchbase.CouchbaseBundleConfiguration;
+import io.smartmachine.couchbase.CouchbaseConfiguration;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+// Make sure to implement CouchbaseBundleConfiguration
+class ConfigurationServerConfig extends Configuration implements CouchbaseBundleConfiguration {
+
+    // All your usual setup goes here
+    
+    // Add this to your configuration class
+    @Valid
+    @NotNull
+    private CouchbaseConfiguration cbc = new CouchbaseConfiguration();
+
+    @JsonProperty("couchbase")
+    public CouchbaseConfiguration getCouchbaseConfiguration() {
+        return cbc;
+    }
+
+    @JsonProperty("couchbase")
+    public void setCouchbaseConfiguration(CouchbaseConfiguration cbc) {
+        this.cbc = cbc;
     }
 }
 ```
