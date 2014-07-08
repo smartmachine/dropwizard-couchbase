@@ -211,7 +211,7 @@ function (doc, meta) {
 }
 ```
 
-The emit statement can be controlled as well, `emit(meta.id, null)` is the default.  The following annotation will generate a view that emits full documents: `@ViewQuery("/^DEVICE/.test(meta.id)", emit = "emit(meta.id, doc)")`. Note that the name of the Design Document will be your model class `.toUpperCase`.
+The emit statement can be controlled as well, `emit(meta.id, null)` is the default.  The following annotation will generate a view that emits full documents: `@ViewQuery("/^DEVICE/.test(meta.id)", emit = "emit(meta.id, doc)")`. Note that the name of the Design Document will be your model class `.toUpperCase()`.
 
 The extended `GenericAccessor<Device>` interface has the following contract, all methods will be automatically implemented:
 
@@ -320,10 +320,17 @@ public class DeviceResource {
     
 }
 ```
+## Roadmap for version 0.2.3
+
+- [ ] Implement full set of configuration options for CouchbaseClientFactory
+- [ ] Implement command line actions to sync Design Documents and Views with Couchbase and check connectivity
+- [ ] Implement proper Couchbase health checks and metrics
 
 
+## Contributors
 
+Pull requests are very welcome.  Create issues in the Github issue system for this repository against any bugs/feature requests.
 
+## License
 
-
-
+dropwizard-couchbase is released under the MIT license.
