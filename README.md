@@ -15,6 +15,8 @@ At the moment dropwizard-couchbase is compiled against JDK 8 because I love lamb
 
 ## Quickstart
 
+### Dependencies
+
 Add the following dependency to your build.gradle
 ``` groovy
 dependencies {
@@ -34,6 +36,9 @@ or pom.xml
     </dependency>
   </dependencies>
 </project>
+
+### Add bundle
+
 ```
 Add a `CouchbaseBundle` to your `Application` class:
 ``` java
@@ -103,3 +108,7 @@ class ConfigurationServerConfig extends Configuration implements CouchbaseBundle
     }
 }
 ```
+
+### Configuration
+
+Configuration bla bla bla
