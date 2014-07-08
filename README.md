@@ -1,8 +1,6 @@
 # dropwizard-couchbase
 
 Build Status: [![Build Status](https://travis-ci.org/smartmachine/dropwizard-couchbase.svg?branch=master)](https://travis-ci.org/smartmachine/dropwizard-couchbase)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coverage Status: [![Coverage Status](https://img.shields.io/coveralls/smartmachine/dropwizard-couchbase.svg)](https://coveralls.io/r/smartmachine/dropwizard-couchbase?branch=master)
-
-
 ## Introduction
 dropwizard-couchbase is Dropwizard bundle for Couchbase persistence.
 
@@ -37,10 +35,12 @@ or pom.xml
   </dependencies>
 </project>
 
+```
+
 ### Add bundle
 
-```
 Add a `CouchbaseBundle` to your `Application` class:
+
 ``` java
 package io.sample;
 
@@ -73,7 +73,9 @@ public class ConfigurationServer extends Application<ConfigurationServerConfig> 
     }
 }
 ```
+
 Implement `CouchbaseBundleConfiguration` in your configuration class.
+
 ``` java
 package io.smartmachine.cs;
 
