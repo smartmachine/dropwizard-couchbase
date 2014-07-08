@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/smartmachine/dropwizard-couchbase.png?label=ready&title=Ready)](https://waffle.io/smartmachine/dropwizard-couchbase)
 # dropwizard-couchbase
 
 Build Status: [![Build Status](https://travis-ci.org/smartmachine/dropwizard-couchbase.svg?branch=master)](https://travis-ci.org/smartmachine/dropwizard-couchbase)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coverage Status: [![Coverage Status](https://img.shields.io/coveralls/smartmachine/dropwizard-couchbase.svg)](https://coveralls.io/r/smartmachine/dropwizard-couchbase?branch=master)
