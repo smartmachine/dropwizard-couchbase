@@ -325,7 +325,8 @@ public class DeviceResource {
 - [ ] Implement full set of configuration options for CouchbaseClientFactory
 - [ ] Implement command line actions to sync Design Documents and Views with Couchbase and check connectivity
 - [ ] Implement proper Couchbase health checks and metrics
-
+- [ ] Finish out unit tests
+- [ ] Update Javadocs
 
 ## Contributors
 
