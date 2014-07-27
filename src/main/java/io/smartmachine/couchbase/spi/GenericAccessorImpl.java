@@ -1,6 +1,5 @@
 package io.smartmachine.couchbase.spi;
 
-
 import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.protocol.views.*;
 import com.fasterxml.jackson.core.JsonProcessingException;

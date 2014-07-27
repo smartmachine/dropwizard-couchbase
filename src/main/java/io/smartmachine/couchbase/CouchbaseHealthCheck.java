@@ -4,7 +4,7 @@ import com.codahale.metrics.health.HealthCheck;
 
 import java.net.InetSocketAddress;
 
-public class CouchbaseHealthCheck extends HealthCheck{
+public class CouchbaseHealthCheck extends HealthCheck {
 
     private CouchbaseClientFactory factory;
 

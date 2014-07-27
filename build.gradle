@@ -16,7 +16,10 @@ buildscript {
 }
 
 group = 'io.smartmachine'
-version = '0.2.2'
+version = '0.2.3-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 ext.signRelease = !("$System.env.TRAVIS" == "true")
 
