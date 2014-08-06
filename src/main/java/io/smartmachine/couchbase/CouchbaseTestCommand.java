@@ -6,12 +6,12 @@ import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class CouchbaseCommand<T extends Configuration> extends ConfiguredCommand<T> {
+public class CouchbaseTestCommand<T extends Configuration> extends ConfiguredCommand<T> {
 
     private CouchbaseConfiguration<T> strategy = null;
     private Class<T> klass = null;
 
-    public CouchbaseCommand(String name, String description, CouchbaseConfiguration<T> strategy, Class<T> klass) {
+    public CouchbaseTestCommand(String name, String description, CouchbaseConfiguration<T> strategy, Class<T> klass) {
         super(name, description);
         this.strategy = strategy;
         this.klass = klass;
