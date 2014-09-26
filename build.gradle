@@ -3,7 +3,7 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'jacoco'
-apply plugin: 'coveralls'
+apply plugin: 'com.github.kt3k.coveralls'
 
 buildscript {
     repositories {
@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.6.0'
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.0'
     }
 }
 
@@ -156,10 +156,14 @@ sourceSets {
 plugins.withType(IdeaPlugin) {
     idea {
         module {
-            scopes.PROVIDED.plus += configurations.provided
-            scopes.COMPILE.minus += configurations.provided
-            scopes.TEST.minus += configurations.provided
-            scopes.RUNTIME.minus += configurations.provided
+            scopes.PROVIDED.plus += [configurations.provided]
+            scopes.COMPILE.minus += [configurations.provided]
+            scopes.TEST.minus += [configurations.provided]
+            scopes.RUNTIME.minus += [configurations.provided]
         }
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
 }
