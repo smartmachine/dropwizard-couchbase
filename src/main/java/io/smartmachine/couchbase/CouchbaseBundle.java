@@ -5,7 +5,7 @@ import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.util.Generics;
-import io.smartmachine.couchbase.spi.AccessorProvider;
+import io.smartmachine.couchbase.spi.AccessorResolver;
 
 public abstract class CouchbaseBundle<T extends Configuration> implements ConfiguredBundle<T>, CouchbaseConfiguration<T> {
 
@@ -22,7 +22,7 @@ public abstract class CouchbaseBundle<T extends Configuration> implements Config
         final CouchbaseHealthCheck couchbaseHealthCheck = new CouchbaseHealthCheck(factory);
         environment.lifecycle().manage(factory);
         environment.healthChecks().register("couchbase", couchbaseHealthCheck);
-        environment.jersey().register(new AccessorProvider(factory));
+        environment.jersey().register(new AccessorResolver.Binder());
     }
 
 }
