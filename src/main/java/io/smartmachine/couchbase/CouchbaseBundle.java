@@ -22,7 +22,7 @@ public abstract class CouchbaseBundle<T extends Configuration> implements Config
         final CouchbaseHealthCheck couchbaseHealthCheck = new CouchbaseHealthCheck(factory);
         environment.lifecycle().manage(factory);
         environment.healthChecks().register("couchbase", couchbaseHealthCheck);
-        environment.jersey().register(new AccessorResolver.Binder());
+        environment.jersey().register(new AccessorResolver.Binder(factory));
     }
 
 }
