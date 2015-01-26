@@ -9,6 +9,8 @@ The current version is 0.2.3 and it has the following dependencies:
 * io.dropwizard dropwizard-core 0.8.0-rc2 (provided)
 * com.couchbase.client couchbase-client 1.4.6 (compile time)
 
+If you are looking for the latest version compatible with dropwizard 0.7.x, it can be found [here](https://www.google.com).
+
 At the moment dropwizard-couchbase is compiled against JDK 8 because I love lambdas.
 
 ## Quickstart
