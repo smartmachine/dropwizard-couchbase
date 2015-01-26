@@ -80,7 +80,7 @@ public class ConfigurationServer extends Application<ConfigurationServerConfig> 
 }
 ```
 
-Implement `CouchbaseBundleConfiguration` in your configuration class.
+Implement your configuration class.
 
 ``` java
 package io.smartmachine.cs;
