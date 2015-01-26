@@ -1,6 +1,7 @@
-package io.smartmachine.couchbase;
+package io.smartmachine.couchbase.health;
 
 import com.codahale.metrics.health.HealthCheck;
+import io.smartmachine.couchbase.CouchbaseClientFactory;
 
 import java.net.InetSocketAddress;
 

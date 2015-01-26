@@ -1,8 +1,10 @@
-package io.smartmachine.couchbase;
+package io.smartmachine.couchbase.cli;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.cli.ConfiguredCommand;
 import io.dropwizard.setup.Bootstrap;
+import io.smartmachine.couchbase.CouchbaseClientFactory;
+import io.smartmachine.couchbase.CouchbaseConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 

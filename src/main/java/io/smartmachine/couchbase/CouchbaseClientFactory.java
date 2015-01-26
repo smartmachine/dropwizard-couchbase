@@ -83,7 +83,7 @@ public class CouchbaseClientFactory implements Managed {
     }
 
     public void start() throws Exception {
-        log.info("Connecting to Couchbase -> hosts: " + hosts + " bucket: " + bucket + " password: " + password);
+        log.info("Connecting to Couchbase -> hosts: " + hosts + " bucket: " + bucket + " password: *****");
         CouchbaseConnectionFactoryBuilder builder = new CouchbaseConnectionFactoryBuilder();
         CouchbaseConnectionFactory factory = builder.buildCouchbaseConnection(hosts, bucket, password);
         manager = factory.getClusterManager();
