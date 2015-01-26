@@ -4,10 +4,10 @@ Build Status: [![Build Status](https://travis-ci.org/smartmachine/dropwizard-cou
 ## Introduction
 dropwizard-couchbase is Dropwizard bundle for Couchbase persistence.
 
-The current version is 0.2.2 and it has the following dependencies:
+The current version is 0.2.3 and it has the following dependencies:
 
-* io.dropwizard dropwizard-core 0.7.1 (provided)
-* com.couchbase.client couchbase-client 1.4.3 (compile time)
+* io.dropwizard dropwizard-core 0.8.0-rc2 (provided)
+* com.couchbase.client couchbase-client 1.4.6 (compile time)
 
 At the moment dropwizard-couchbase is compiled against JDK 8 because I love lambdas.
 
@@ -18,7 +18,7 @@ At the moment dropwizard-couchbase is compiled against JDK 8 because I love lamb
 Add the following dependency to your build.gradle
 ``` groovy
 dependencies {
-  compile "io.smartmachine:dropwizard-couchbase:0.2.2"
+  compile "io.smartmachine:dropwizard-couchbase:0.2.3"
 }
 ```
 or pom.xml
@@ -29,7 +29,7 @@ or pom.xml
     <dependency>
       <groupId>io.smartmachine</groupId>
       <artifactId>dropwizard-couchbase</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.3</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
@@ -55,7 +55,13 @@ public class ConfigurationServer extends Application<ConfigurationServerConfig> 
         new ConfigurationServer().run(args);
     }
 
-    private final CouchbaseBundle couchbaseBundle = new CouchbaseBundle();
+    private final CouchbaseBundle<ConfigurationServerConfig> couchbaseBundle = new CouchbaseBundle<ConfigurationServerConfig>() {
+
+        @Override
+        public CouchbaseClientFactory getCouchbaseClientFactory(ConfigurationServerConfig configuration) {
+            return configuration.getCouchbaseClientFactory();
+        }
+    };
 
     @Override
     public void initialize(Bootstrap<ConfigurationServerConfig> bootstrap) {
@@ -81,32 +87,27 @@ package io.smartmachine.cs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import io.smartmachine.couchbase.CouchbaseBundleConfiguration;
-import io.smartmachine.couchbase.CouchbaseConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
-// Make sure to implement CouchbaseBundleConfiguration
-class ConfigurationServerConfig extends Configuration implements CouchbaseBundleConfiguration {
+class ConfigurationServerConfig extends Configuration {
 
     // All your usual setup goes here
     
-    // Add this to your configuration class
     @Valid
     @NotNull
-    private CouchbaseConfiguration cbc = new CouchbaseConfiguration();
+    private CouchbaseClientFactory ccf = new CouchbaseClientFactory();
 
     @JsonProperty("couchbase")
-    public CouchbaseConfiguration getCouchbaseConfiguration() {
-        return cbc;
+    public CouchbaseClientFactory getCouchbaseClientFactory() {
+        return ccf;
     }
 
     @JsonProperty("couchbase")
-    public void setCouchbaseConfiguration(CouchbaseConfiguration cbc) {
-        this.cbc = cbc;
+    public void setCouchbaseClientFactory(CouchbaseClientFactory ccf) {
+        this.ccf = ccf;
     }
 }
 ```
@@ -320,10 +321,9 @@ public class DeviceResource {
     
 }
 ```
-## Roadmap for version 0.2.3
+## Roadmap for version 0.2.4
 
 - [ ] Implement full set of configuration options for CouchbaseClientFactory
-- [ ] Implement command line actions to sync Design Documents and Views with Couchbase and check connectivity
 - [ ] Implement proper Couchbase health checks and metrics
 - [ ] Finish out unit tests
 - [ ] Update Javadocs
