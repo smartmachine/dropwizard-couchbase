@@ -1,9 +1,8 @@
 package io.smartmachine.couchbase;
 
-import com.couchbase.client.ClusterManager;
-import com.couchbase.client.CouchbaseClient;
-import com.couchbase.client.CouchbaseConnectionFactory;
-import com.couchbase.client.CouchbaseConnectionFactoryBuilder;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.CouchbaseCluster;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.lifecycle.Managed;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -12,64 +11,55 @@ import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class CouchbaseClientFactory implements Managed {
 
-    private CouchbaseClient client = null;
+    private Cluster cluster = null;
+    private Bucket bucket = null;
+
     private static Logger log = LoggerFactory.getLogger(CouchbaseClientFactory.class);
-    private ClusterManager manager;
 
 
-    public CouchbaseClient client() {
-        return client;
+    public Bucket bucket() {
+        return bucket;
     }
 
-    public ClusterManager getClusterManager() {
-        return manager;
+    public Cluster cluster() {
+        return cluster;
     }
 
     @Valid
     @NotNull
-    private List<URI> hosts = new ArrayList<>();
-
-    {
-        try {
-            hosts.add(new URI("http://localhost:8091/pools"));
-        } catch (URISyntaxException e) {
-            hosts = null;
-        }
-    }
+    private List<String> hosts = new ArrayList<>();
 
     @Valid
     @NotEmpty
-    private String bucket = "default";
+    private String bucketName = "default";
 
     @Valid
     private String password = null;
 
     @JsonProperty
-    public List<URI> getHosts() {
+    public List<String> getHosts() {
         return hosts;
     }
 
     @JsonProperty
-    public void setHosts(List<URI> hosts) {
+    public void setHosts(List<String> hosts) {
         this.hosts = hosts;
     }
 
     @JsonProperty
-    public String getBucket() {
-        return bucket;
+    public String getBucketName() {
+        return bucketName;
     }
 
     @JsonProperty
-    public void setBucket(String bucket) {
-        this.bucket = bucket;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 
     @JsonProperty
@@ -83,16 +73,14 @@ public class CouchbaseClientFactory implements Managed {
     }
 
     public void start() throws Exception {
-        log.info("Connecting to Couchbase -> hosts: " + hosts + " bucket: " + bucket + " password: *****");
-        CouchbaseConnectionFactoryBuilder builder = new CouchbaseConnectionFactoryBuilder();
-        CouchbaseConnectionFactory factory = builder.buildCouchbaseConnection(hosts, bucket, password);
-        manager = factory.getClusterManager();
-        client = new CouchbaseClient(factory);
+        log.info("Connecting to Couchbase -> hosts: " + hosts + " bucket: " + bucketName + " password: *****");
+        cluster = CouchbaseCluster.create(hosts);
+        bucket = cluster.openBucket(bucketName, password);
     }
 
     public void stop() throws Exception {
-        manager.shutdown();
-        client.shutdown(30, TimeUnit.SECONDS);
+        log.info("Disconnecting from Couchbase Cluster");
+        cluster.disconnect(30, TimeUnit.SECONDS);
     }
 
 

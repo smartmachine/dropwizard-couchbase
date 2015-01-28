@@ -16,7 +16,7 @@ buildscript {
 }
 
 group = 'io.smartmachine'
-version = '0.2.3'
+version = '0.2.4-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.couchbase.client:couchbase-client:1.4.6'
+    compile 'com.couchbase.client:java-client:2.0.3'
     compile 'eu.infomas:annotation-detector:3.0.4'
     provided 'io.dropwizard:dropwizard-core:0.8.0-rc2'
     testCompile "junit:junit:4.12"

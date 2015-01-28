@@ -1,13 +1,15 @@
 package io.smartmachine.couchbase.spi;
 
-import com.couchbase.client.CouchbaseClient;
-import com.couchbase.client.protocol.views.*;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.bucket.BucketManager;
+import com.couchbase.client.java.document.RawJsonDocument;
+import com.couchbase.client.java.view.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
+import io.smartmachine.couchbase.CouchbaseView;
 import io.smartmachine.couchbase.GenericAccessor;
-import io.smartmachine.couchbase.ViewQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +25,13 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     private static Logger log = LoggerFactory.getLogger(GenericAccessorImpl.class);
 
     final private Class<T> type;
-    final private CouchbaseClient client;
-    private Map<String, View>  views = new HashMap<>();
+    final private Bucket bucket;
+    private Map<String, View> views = new HashMap<>();
     private ObjectMapper mapper = Jackson.newObjectMapper();
 
     public GenericAccessorImpl(Class<T> type, CouchbaseClientFactory factory) {
         this.type = type;
-        this.client = factory.client();
+        this.bucket = factory.bucket();
     }
 
     private T deserialize(Object json) {
@@ -54,55 +56,49 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     @Override
     public void create(String id, T newinstance) {
         log.info("Create: " + type.getSimpleName());
-        client.add(makeKey(id), serialize(newinstance)).addListener(future ->
-                        log.info("Create status: " + future.getStatus())
-        );
+        bucket.insert(RawJsonDocument.create(makeKey(id), serialize(newinstance)));
     }
 
     @Override
     public T read(String id) {
         log.info("Reading : " + type.getSimpleName());
-        return deserialize(client.get(makeKey(id)));
+        return deserialize(bucket.get(makeKey(id), RawJsonDocument.class).content());
     }
 
     @Override
     public void update(String id, T object) {
         log.info("Updating: " + type.getSimpleName());
-        client.replace(makeKey(id), serialize(object)).addListener(future ->
-                        log.info("Update status: " + future.getStatus())
-        );
+        bucket.replace(RawJsonDocument.create(makeKey(id), serialize(object)));
     }
 
     @Override
     public void delete(String id) {
         log.info("Delete: " + type.getSimpleName());
-        client.delete(makeKey(id)).addListener(future ->
-                        log.info("Delete status: " + future.getStatus())
-        );
+        bucket.remove(makeKey(id));
     }
 
     @Override
     public void set(String id, T object) {
         log.info("Set: " + type.getSimpleName());
-        client.set(makeKey(id), serialize(object)).addListener(future ->
-                        log.info("Set status: " + future.getStatus())
-        );
+        bucket.upsert(RawJsonDocument.create(makeKey(id), serialize(object)));
     }
 
     @Override
     public List<T> executeFinder(Method method, Object[] queryArgs) {
         List<T> list = new ArrayList<>();
         View view = views.get(method.getName());
+        log.info(views.toString());
         if (view == null) {
-            throw new IllegalStateException("You must annotate your Accessor interface method with ViewQuery!");
+            throw new IllegalStateException("You must annotate your Accessor interface method with CouchbaseView!");
         }
-        Query query = new Query();
-        query.setIncludeDocs(true);
-        query.setStale(Stale.FALSE);
-        ViewResponse response = client.query(view, query);
-        ObjectMapper mapper = new ObjectMapper();
+        ViewQuery query = ViewQuery.from(type.getSimpleName().toUpperCase(), method.getName());
+        query.stale(Stale.FALSE);
+        List<ViewRow> response = bucket
+                .query(ViewQuery.from(type.getSimpleName().toUpperCase(), method.getName()))
+                .allRows();
+
         for (ViewRow row : response) {
-            String json = (String) row.getDocument();
+            String json = row.document().content().toString();
             try {
                 list.add(mapper.readValue(json, type));
             } catch (IOException e) {
@@ -114,36 +110,43 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
 
     public void cacheViews(Class accessorClass) {
         views.clear();
-        log.info("Scanning " + accessorClass.getName() +" for ViewQuery annotated methods ...");
+        log.info("Scanning " + accessorClass.getName() +" for CouchbaseView annotated methods ...");
         for (Method method : accessorClass.getMethods()) {
-            ViewQuery vq = method.getDeclaredAnnotation(ViewQuery.class);
+            CouchbaseView vq = method.getDeclaredAnnotation(CouchbaseView.class);
             if (vq == null) {
                 continue;
             }
             View view = getOrCreateView(method, vq);
-            log.info("Caching view: " + view.getViewName());
-            views.put(method.getName(),  getOrCreateView(method, vq));
+            log.info("Caching view: " + view);
+            views.put(method.getName(),  view);
         }
     }
 
-    private View getOrCreateView(Method method, ViewQuery vq) {
+    private View getOrCreateView(Method method, CouchbaseView vq) {
+        BucketManager mgr = bucket.bucketManager();
         // Construct the document and view names.
         // TODO Pluggable naming strategies??
         String docName = type.getSimpleName().toUpperCase();
         String viewName = method.getName();
 
-        try {
-            return client.getView(docName, viewName);
-        } catch (InvalidViewException e) {
-            log.info("View " + viewName + " does not exist, creating it.");
-        }
-        DesignDocument doc;
-        try {
-            doc = client.getDesignDoc(docName);
-        } catch (InvalidViewException e) {
+        DesignDocument doc = mgr.getDesignDocument(docName);
+        if (doc == null) {
             log.info("Design document " + docName + " does not exist, creating it.");
-            doc = new DesignDocument(docName);
+            doc = DesignDocument.create(docName, new ArrayList<>());
         }
+
+        List<View> views = doc.views();
+
+        log.info("Views from server: " + views.toString());
+
+        for (View viewFinder : views) {
+            if (viewFinder.name().equals(viewName)) {
+                log.info("ViewName: " + viewName + " View returned from server: " + viewFinder);
+                return viewFinder;
+            }
+        }
+        log.info("View not present, creating.");
+
         StringBuilder mapBuilder = new StringBuilder();
         mapBuilder.append("function (doc, meta) {\n")
                 .append("  if (")
@@ -152,10 +155,10 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
                 .append("    ").append(vq.emit()).append(";\n")
                 .append("  }\n")
                 .append("}");
-        ViewDesign viewDesign = new ViewDesign(viewName, mapBuilder.toString());
-        doc.setView(viewDesign);
-        client.createDesignDoc(doc);
-        return client.getView(docName, viewName);
+        View view = DefaultView.create(viewName, mapBuilder.toString());
+        views.add(view);
+        mgr.upsertDesignDocument(doc);
+        return view;
     }
 
     private String makeKey(String id) {

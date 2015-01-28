@@ -192,7 +192,7 @@ In order to enable automatic DAO gemeration you need to write an Accessor interf
 package io.sample.api;
 
 import io.smartmachine.couchbase.GenericAccessor;
-import io.smartmachine.couchbase.ViewQuery;
+import io.smartmachine.couchbase.CouchbaseView;
 
 import java.util.List;
 
