@@ -186,7 +186,7 @@ public class  Device {
 }
 ```
 
-In order to enable automatic DAO gemeration you need to write an Accessor interface (similar to DAO class/interface in JPA/Hibernate):
+In order to enable automatic DAO generation you need to write an Accessor interface (similar to DAO class/interface in JPA/Hibernate):
 
 ```java
 package io.sample.api;
