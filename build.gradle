@@ -1,18 +1,10 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'maven'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
-apply plugin: 'com.github.kt3k.coveralls'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
-    }
+plugins {
+  id 'java'
+  id 'idea'
+  id 'maven'
+  id 'signing'
+  id 'jacoco'
+  id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 group = 'io.smartmachine'
@@ -73,7 +65,7 @@ tasks.withType(Test) {
 }
 
 jacoco {
-    toolVersion = "0.7.1.201405082137"
+    toolVersion = "0.7.6.201602180812"
 }
 
 jacocoTestReport {
