@@ -2,6 +2,7 @@ package io.smartmachine.couchbase.spi;
 
 
 import com.couchbase.client.CouchbaseClient;
+import com.couchbase.client.java.Bucket;
 import com.couchbase.client.protocol.views.View;
 import com.couchbase.client.protocol.views.ViewResponse;
 import com.couchbase.client.protocol.views.ViewRow;
@@ -36,10 +37,11 @@ public class AccessorFactoryTest {
     @Before
     public void setup() {
         factory = mock(CouchbaseClientFactory.class);
-        CouchbaseClient client = mock(CouchbaseClient.class);
+        Bucket bucket = mock(Bucket.class);
+        bucket.
         ViewResponse response = mock(ViewResponse.class);
-        when(factory.client()).thenReturn(client);
-        when(client.getView("TESTER", "findAll")).thenReturn(new View("", "", "findAll", false, false));
+        when(factory.bucket()).thenReturn(bucket);
+        when(bucket.getView("TESTER", "findAll")).thenReturn(new View("", "", "findAll", false, false));
         when(client.query(any(), any())).thenReturn(response);
         when(response.iterator()).thenReturn(new ArrayList<ViewRow>().iterator());
     }

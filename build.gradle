@@ -16,7 +16,7 @@ buildscript {
 }
 
 group = 'io.smartmachine'
-version = '0.2.4-SNAPSHOT'
+ext.releaseVersion = '0.2.4'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -149,6 +149,24 @@ uploadArchives {
     }
 }
 
+task release(dependsOn: 'uploadArchives') << {
+    description 'Build a release version of the library and upload it to Maven Central.'
+    println "Released version: $version to https://oss.sonatype.org"
+}
+
+task snapshot(dependsOn: install)  << {
+    description 'Install a version of this library in the local .m2 repo.'
+    println "Installed version: $version in local .m2 repo."
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = releaseVersion
+    } else {
+        version = "$releaseVersion-SNAPSHOT"
+    }
+}
+
 sourceSets {
     main {
         compileClasspath = compileClasspath + configurations.provided
@@ -167,5 +185,5 @@ plugins.withType(IdeaPlugin) {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '3.5'
 }
