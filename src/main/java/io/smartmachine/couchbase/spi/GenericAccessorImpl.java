@@ -1,7 +1,7 @@
 package io.smartmachine.couchbase.spi;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.bucket.BucketManager;
+import com.couchbase.client.java.AsyncBucket;
+import com.couchbase.client.java.bucket.AsyncBucketManager;
 import com.couchbase.client.java.document.RawJsonDocument;
 import com.couchbase.client.java.view.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +12,7 @@ import io.smartmachine.couchbase.CouchbaseView;
 import io.smartmachine.couchbase.GenericAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Subscriber;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -19,13 +20,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecutor<T> {
 
     private static Logger log = LoggerFactory.getLogger(GenericAccessorImpl.class);
 
     final private Class<T> type;
-    final private Bucket bucket;
+    final private AsyncBucket bucket;
     private Map<String, View> views = new HashMap<>();
     private ObjectMapper mapper = Jackson.newObjectMapper();
 
@@ -34,14 +38,14 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         this.bucket = factory.bucket();
     }
 
-    private T deserialize(Object json) {
-        if (json == null) {
+    private T deserialize(RawJsonDocument doc) {
+        if (doc == null) {
             return null;
         }
         try {
-            return mapper.readValue((String) json, type);
+            return mapper.readValue(doc.content(), type);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot convert JSON: " + json + " to " + type.getSimpleName());
+            throw new IllegalStateException("Cannot convert JSON: " + doc.content() + " to " + type.getSimpleName());
         }
     }
 
@@ -60,9 +64,15 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     }
 
     @Override
-    public T read(String id) {
+    public CompletableFuture<T> read(String id) {
+        CompletableFuture<T> future = new CompletableFuture<>();
         log.info("Reading : " + type.getSimpleName());
-        return deserialize(bucket.get(makeKey(id), RawJsonDocument.class).content());
+        bucket.get(makeKey(id), RawJsonDocument.class)
+                .doOnError(future::completeExceptionally)
+                .single()
+                .map(this::deserialize)
+                .forEach(future::complete);
+        return future;
     }
 
     @Override
@@ -123,13 +133,16 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
     }
 
     private View getOrCreateView(Method method, CouchbaseView vq) {
-        BucketManager mgr = bucket.bucketManager();
+
+        AsyncBucketManager mgr = bucket.bucketManager().toBlocking().single();
+
+
         // Construct the document and view names.
         // TODO Pluggable naming strategies??
         String docName = type.getSimpleName().toUpperCase();
         String viewName = method.getName();
 
-        DesignDocument doc = mgr.getDesignDocument(docName);
+        DesignDocument doc = mgr.getDesignDocument(docName).toBlocking().single();
         if (doc == null) {
             log.info("Design document " + docName + " does not exist, creating it.");
             doc = DesignDocument.create(docName, new ArrayList<>());

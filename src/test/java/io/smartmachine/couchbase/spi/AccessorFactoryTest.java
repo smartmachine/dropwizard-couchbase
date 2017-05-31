@@ -1,7 +1,6 @@
 package io.smartmachine.couchbase.spi;
 
 
-import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.protocol.views.View;
 import com.couchbase.client.protocol.views.ViewResponse;
