@@ -1,10 +1,9 @@
 package io.smartmachine.couchbase;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
+import com.couchbase.client.java.AsyncBucket;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.lifecycle.Managed;
+import io.smartmachine.couchbase.spi.CouchbaseDriver;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,23 +12,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class CouchbaseClientFactory implements Managed {
 
-    private Cluster cluster = null;
-    private Bucket bucket = null;
+    private volatile CouchbaseDriver driver = null;
 
     private static Logger log = LoggerFactory.getLogger(CouchbaseClientFactory.class);
 
-
-    public Bucket bucket() {
-        return bucket;
-    }
-
-    public Cluster cluster() {
-        return cluster;
-    }
 
     @Valid
     @NotNull
@@ -74,14 +63,16 @@ public class CouchbaseClientFactory implements Managed {
 
     public void start() throws Exception {
         log.info("Connecting to Couchbase -> hosts: " + hosts + " bucket: " + bucketName + " password: *****");
-        cluster = CouchbaseCluster.create(hosts);
-        bucket = cluster.openBucket(bucketName, password);
+        driver = CouchbaseDriver.create(hosts, bucketName, password);
     }
 
     public void stop() throws Exception {
         log.info("Disconnecting from Couchbase Cluster");
-        cluster.disconnect(30, TimeUnit.SECONDS);
+        driver.close().get();
     }
 
 
+    public AsyncBucket bucket() {
+        return driver.bucket();
+    }
 }
