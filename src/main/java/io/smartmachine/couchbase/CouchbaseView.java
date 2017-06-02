@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ViewQuery {
+public @interface CouchbaseView {
 
     public String value();
     public String emit() default "emit(meta.id, null)";

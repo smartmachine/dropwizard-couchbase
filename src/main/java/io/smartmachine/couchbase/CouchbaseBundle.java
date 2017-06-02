@@ -16,8 +16,8 @@ public abstract class CouchbaseBundle<T extends Configuration> implements Config
     @Override
     public final void initialize(Bootstrap<?> bootstrap) {
         final Class<T> klass = Generics.getTypeParameter(getClass(), Configuration.class);
-        bootstrap.addCommand(new CouchbaseTestCommand<>("cbtest", "Tests the connection to Couchbase.", this, klass));
-        bootstrap.addCommand(new CouchbaseInitCommand<>("cbinit", "Syncs all design documents with Couchbase.", this, klass));
+        bootstrap.addCommand(new CouchbaseTestCommand("cbtest", "Tests the connection to Couchbase.", this, klass));
+        bootstrap.addCommand(new CouchbaseInitCommand("cbinit", "Syncs all design documents with Couchbase.", this, klass));
     }
 
     @Override

@@ -1,22 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'maven'
-apply plugin: 'signing'
-apply plugin: 'jacoco'
-apply plugin: 'com.github.kt3k.coveralls'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
-    }
+plugins {
+  id 'java'
+  id 'idea'
+  id 'maven'
+  id 'signing'
+  id 'jacoco'
+  id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 group = 'io.smartmachine'
-version = '0.2.3'
+ext.releaseVersion = '0.9.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -34,12 +26,12 @@ repositories {
 }
 
 dependencies {
-    compile 'com.couchbase.client:couchbase-client:1.4.6'
-    compile 'eu.infomas:annotation-detector:3.0.4'
-    provided 'io.dropwizard:dropwizard-core:0.8.0-rc2'
+    compile 'com.couchbase.client:java-client:2.4.5'
+    compile 'eu.infomas:annotation-detector:3.0.5'
+    provided 'io.dropwizard:dropwizard-core:1.1.1'
     testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:1.10.17"
-    testCompile "io.dropwizard:dropwizard-testing:0.8.0-rc2"
+    testCompile "org.mockito:mockito-core:2.8.9"
+    testCompile "io.dropwizard:dropwizard-testing:1.1.1"
 }
 
 task integrationTest(type: Test) {
@@ -73,7 +65,7 @@ tasks.withType(Test) {
 }
 
 jacoco {
-    toolVersion = "0.7.1.201405082137"
+    toolVersion = "0.7.6.201602180812"
 }
 
 jacocoTestReport {
@@ -149,6 +141,24 @@ uploadArchives {
     }
 }
 
+task release(dependsOn: 'uploadArchives') << {
+    description 'Build a release version of the library and upload it to Maven Central.'
+    println "Released version: $version to https://oss.sonatype.org"
+}
+
+task snapshot(dependsOn: install)  << {
+    description 'Install a version of this library in the local .m2 repo.'
+    println "Installed version: $version in local .m2 repo."
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = releaseVersion
+    } else {
+        version = "$releaseVersion-SNAPSHOT"
+    }
+}
+
 sourceSets {
     main {
         compileClasspath = compileClasspath + configurations.provided
@@ -167,5 +177,5 @@ plugins.withType(IdeaPlugin) {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '3.5'
 }

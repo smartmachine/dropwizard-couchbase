@@ -4,14 +4,12 @@ Build Status: [![Build Status](https://travis-ci.org/smartmachine/dropwizard-cou
 ## Introduction
 dropwizard-couchbase is a Dropwizard bundle for Couchbase persistence.
 
-The current version is 0.2.3 and it has the following dependencies:
+The current version is 0.9.1 and it has the following dependencies:
 
-* io.dropwizard dropwizard-core **0.8.0-rc2** (provided)
-* com.couchbase.client couchbase-client 1.4.6 (compile time)
+* io.dropwizard dropwizard-core **1.1.1** (provided)
+* com.couchbase.client couchbase-client 2.4.5 (compile time)
 
-If you are looking for the latest version compatible with **dropwizard 0.7.x**, it can be found [here](https://github.com/smartmachine/dropwizard-couchbase/tree/v0.2.2).
-
-At the moment dropwizard-couchbase is compiled against JDK 8 because I love lambdas.
+dropwizard-couchbase is compiled against JDK 8.
 
 ## Quickstart
 
@@ -20,7 +18,7 @@ At the moment dropwizard-couchbase is compiled against JDK 8 because I love lamb
 Add the following dependency to your build.gradle
 ``` groovy
 dependencies {
-  compile "io.smartmachine:dropwizard-couchbase:0.2.3"
+  compile "io.smartmachine:dropwizard-couchbase:0.9.1"
 }
 ```
 or pom.xml
@@ -31,7 +29,7 @@ or pom.xml
     <dependency>
       <groupId>io.smartmachine</groupId>
       <artifactId>dropwizard-couchbase</artifactId>
-      <version>0.2.3</version>
+      <version>0.9.1</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
@@ -192,7 +190,7 @@ In order to enable automatic DAO generation you need to write an Accessor interf
 package io.sample.api;
 
 import io.smartmachine.couchbase.GenericAccessor;
-import io.smartmachine.couchbase.ViewQuery;
+import io.smartmachine.couchbase.CouchbaseView;
 
 import java.util.List;
 
@@ -323,7 +321,7 @@ public class DeviceResource {
     
 }
 ```
-## Roadmap for version 0.2.4
+## Roadmap for version 0.9.2
 
 - [ ] Implement full set of configuration options for CouchbaseClientFactory
 - [ ] Implement proper Couchbase health checks and metrics
