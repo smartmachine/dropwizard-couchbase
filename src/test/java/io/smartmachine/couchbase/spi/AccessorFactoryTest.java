@@ -3,6 +3,8 @@ package io.smartmachine.couchbase.spi;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.bucket.BucketManager;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.view.*;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.GenericAccessor;
@@ -51,14 +53,18 @@ public class AccessorFactoryTest {
         List<ViewRow> rows = new ArrayList<>();
         ViewRow row = mock(ViewRow.class);
         rows.add(row);
+        ViewQuery query = ViewQuery.from("TESTER", "findAll");
+        query.stale(Stale.FALSE);
+        JsonDocument doc = JsonDocument.create("TESTER:123", JsonObject.fromJson("{\"name\": \"name\", \"other\": \"other\"}"));
 
 
         when(factory.bucket()).thenReturn(bucket);
         when(bucket.bucketManager()).thenReturn(mgr);
         when(mgr.getDesignDocument("TESTER")).thenReturn(design);
         when(design.views()).thenReturn(views);
-        when(bucket.query(ViewQuery.from("TESTER", "findAll"))).thenReturn(result);
+        when(bucket.query(query)).thenReturn(result);
         when(result.allRows()).thenReturn(rows);
+        when(row.document()).thenReturn(doc);
     }
 
 

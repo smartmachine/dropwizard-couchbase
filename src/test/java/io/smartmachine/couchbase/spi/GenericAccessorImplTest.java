@@ -6,32 +6,30 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.RawJsonDocument;
 import com.couchbase.client.java.view.View;
 import com.couchbase.client.java.view.ViewRow;
-import com.google.common.collect.Lists;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.api.BrokenTester;
 import io.smartmachine.couchbase.api.Tester;
-import io.smartmachine.couchbase.api.TesterAccessor;
 import io.smartmachine.couchbase.test.UnitTests;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.List;
 
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Category(UnitTests.class)
+@FixMethodOrder(MethodSorters.JVM)
 public class GenericAccessorImplTest {
 
     private GenericAccessorImpl<Tester> impl;
@@ -48,6 +46,8 @@ public class GenericAccessorImplTest {
     @Mock
     private ViewRow viewRow;
 
+    private RawJsonDocument doc;
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
@@ -56,6 +56,7 @@ public class GenericAccessorImplTest {
         MockitoAnnotations.initMocks(this);
         when(factory.bucket()).thenReturn(bucket);
         impl = new GenericAccessorImpl<>(Tester.class, factory);
+        doc = RawJsonDocument.create("TESTER:ABC123", fixture("fixtures/tester.json"));
     }
 
     @Test
@@ -63,16 +64,16 @@ public class GenericAccessorImplTest {
 
         when(bucket.insert(any(RawJsonDocument.class))).thenReturn(any());
         impl.create("ABC123", new Tester("testerName", "testerOtherProperty"));
-        verify(bucket).insert(RawJsonDocument.create("TESTER:ABC123", fixture("fixtures/tester.json")));
+        verify(bucket).insert(doc);
     }
 
     @Test
     public void testRead() throws Exception {
-        when(bucket.get(anyString())).thenReturn(any(JsonDocument.class));
+        when(bucket.get("TESTER:ABC123", RawJsonDocument.class)).thenReturn(doc);
         Tester tester = impl.read("ABC123");
         assertThat(tester.getName(), is("testerName"));
         assertThat(tester.getSomeOtherProperty(), is("testerOtherProperty"));
-        verify(bucket).get("TESTER:ABC123");
+        verify(bucket).get("TESTER:ABC123", RawJsonDocument.class);
     }
 
     @Test
@@ -91,16 +92,16 @@ public class GenericAccessorImplTest {
 
     @Test
     public void testSet() throws Exception {
-        when(bucket.upsert(RawJsonDocument.create(anyString(), anyString()))).thenReturn(any(RawJsonDocument.class));
+        when(bucket.upsert(doc)).thenReturn(doc);
         impl.set("ABC123", new Tester("testerName", "testerOtherProperty"));
-        verify(bucket).upsert(RawJsonDocument.create("TESTER:ABC123", fixture("fixtures/tester.json")));
+        verify(bucket).upsert(doc);
     }
 
     @Test
     public void testReadException() throws Exception {
-        when(bucket.get(anyString())).thenReturn(any(JsonDocument.class));
+        when(bucket.get("TESTER:ABC123BROKEN", RawJsonDocument.class)).thenReturn(RawJsonDocument.create("TESTER:ABC123BROKEN", "{ \"suzie\": \"q\" }"));
         exception.expect(IllegalStateException.class);
-        impl.read("ABC123");
+        impl.read("ABC123BROKEN");
     }
 
     @Test
@@ -111,7 +112,7 @@ public class GenericAccessorImplTest {
 
     @Test
     public void testCreateBroken() throws Exception {
-        when(bucket.insert (RawJsonDocument.create(anyString(), anyString()))).thenReturn(any(RawJsonDocument.class));
+        when(bucket.insert(doc)).thenReturn(doc);
         GenericAccessorImpl<BrokenTester> borkedImpl = new GenericAccessorImpl<>(BrokenTester.class, factory);
         exception.expect(IllegalStateException.class);
         borkedImpl.create("ABC123", new BrokenTester("testerName", "testerOtherProperty"));

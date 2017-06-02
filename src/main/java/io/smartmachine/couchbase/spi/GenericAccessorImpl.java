@@ -93,7 +93,8 @@ public class GenericAccessorImpl<T> implements GenericAccessor<T>, FinderExecuto
         }
         ViewQuery query = ViewQuery.from(type.getSimpleName().toUpperCase(), method.getName());
         query.stale(Stale.FALSE);
-        List<ViewRow> response = bucket.query(query).allRows();
+        ViewResult result = bucket.query(query);
+        List<ViewRow> response = result.allRows();
 
         for (ViewRow row : response) {
             String json = row.document().content().toString();
