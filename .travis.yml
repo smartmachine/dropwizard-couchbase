@@ -5,5 +5,7 @@ jdk:
 env:
   - ORG_GRADLE_PROJECT_sonatypeUser=dummy ORG_GRADLE_PROJECT_sonatypePassword=dummy TERM=dumb
 
+sudo: false
+
 after_success:
   - gradle jacocoTestReport coveralls
