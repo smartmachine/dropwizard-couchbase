@@ -1,11 +1,15 @@
 language: java
-
 jdk:
   - oraclejdk8
 env:
   - ORG_GRADLE_PROJECT_sonatypeUser=dummy ORG_GRADLE_PROJECT_sonatypePassword=dummy TERM=dumb
-
 sudo: false
-
 after_success:
   - gradle jacocoTestReport coveralls
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
