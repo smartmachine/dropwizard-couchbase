@@ -20,9 +20,9 @@ public class CouchbaseClientFactoryTest {
     @Test
     public void clientTest() throws Exception {
         CouchbaseClientFactory factory = new CouchbaseClientFactory();
-        List<URI> pool = new ArrayList<>();
-        pool.add(new URI("http://localhost:8091/pools"));
-        factory.setBucket("config_server");
+        List<String> pool = new ArrayList<>();
+        pool.add("http://localhost:8091/pools");
+        factory.setBucketName("integration_test");
         factory.setHosts(pool);
         factory.setPassword("goliath");
         factory.start();

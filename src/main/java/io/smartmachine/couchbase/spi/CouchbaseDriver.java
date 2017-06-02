@@ -1,29 +1,28 @@
 package io.smartmachine.couchbase.spi;
 
-import com.couchbase.client.java.AsyncBucket;
-import com.couchbase.client.java.CouchbaseAsyncCluster;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.CouchbaseCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class CouchbaseDriver  {
 
     private static final Logger log = LoggerFactory.getLogger(CouchbaseDriver.class);
 
-    private volatile CouchbaseAsyncCluster cluster;
-    private volatile AsyncBucket bucket;
+    private volatile CouchbaseCluster cluster;
+    private volatile Bucket bucket;
 
     private static volatile CouchbaseDriver INSTANCE = null;
 
     private CouchbaseDriver() {}
 
     private CouchbaseDriver(List<String> seedNodes) {
-        this.cluster = CouchbaseAsyncCluster.create(seedNodes);
+        this.cluster = CouchbaseCluster.create(seedNodes);
     }
 
-    private void setBucket(AsyncBucket bucket) {
+    private void setBucket(Bucket bucket) {
         this.bucket = bucket;
     }
 
@@ -32,39 +31,23 @@ public class CouchbaseDriver  {
             synchronized(CouchbaseDriver.class) {
                 if (INSTANCE == null) {
                     INSTANCE = new CouchbaseDriver(seedNodes);
-                    INSTANCE.openBucket(bucketName, password).whenComplete((bucket, exception) -> {
-                        if (exception == null) {
-                            INSTANCE.setBucket(bucket);
-                        } else {
-                            throw new IllegalStateException("Unable to open bucket: " + bucketName, exception);
-                        }
-                    });
+                    INSTANCE.setBucket(INSTANCE.openBucket(bucketName, password));
                 }
             }
         }
         return INSTANCE;
     }
 
-    private CompletableFuture<AsyncBucket> openBucket(String bucketName, String password) {
+    private Bucket openBucket(String bucketName, String password) {
         log.info("Opening Bucket: " + bucketName);
-        final CompletableFuture<AsyncBucket> future = new CompletableFuture<>();
-        cluster.openBucket(bucketName, password)
-                .doOnError(future::completeExceptionally)
-                .single()
-                .forEach(future::complete);
-        return future;
+        return cluster.openBucket(bucketName, password);
     }
 
-    public CompletableFuture<Boolean> close() {
-        final CompletableFuture<Boolean> result = new CompletableFuture<>();
-        cluster.disconnect()
-                .doOnError(result::completeExceptionally)
-                .single()
-                .forEach(result::complete);
-        return result;
+    public boolean close() {
+        return cluster.disconnect();
     }
 
-    public AsyncBucket bucket() {
+    public Bucket bucket() {
         return bucket;
     }
 }

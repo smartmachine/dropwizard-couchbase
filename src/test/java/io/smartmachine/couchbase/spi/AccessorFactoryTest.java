@@ -2,9 +2,8 @@ package io.smartmachine.couchbase.spi;
 
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.protocol.views.View;
-import com.couchbase.client.protocol.views.ViewResponse;
-import com.couchbase.client.protocol.views.ViewRow;
+import com.couchbase.client.java.bucket.BucketManager;
+import com.couchbase.client.java.view.*;
 import io.smartmachine.couchbase.CouchbaseClientFactory;
 import io.smartmachine.couchbase.GenericAccessor;
 import io.smartmachine.couchbase.api.TesterAccessor;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,14 +33,32 @@ public class AccessorFactoryTest {
 
     @Before
     public void setup() {
+
+        List<View> views = new ArrayList<>();
+        String mapBuilder = "function (doc, meta) {\n" +
+                "  if ((/^TESTER/).test(meta.id)) {\n" +
+                "    emit(meta.id, null);\n" +
+                "  }\n" +
+                "}";
+        View view = DefaultView.create("findAll", mapBuilder);
+        views.add(view);
+
         factory = mock(CouchbaseClientFactory.class);
+        BucketManager mgr = mock(BucketManager.class);
+        DesignDocument design = mock(DesignDocument.class);
         Bucket bucket = mock(Bucket.class);
-        bucket.
-        ViewResponse response = mock(ViewResponse.class);
+        ViewResult result = mock(ViewResult.class);
+        List<ViewRow> rows = new ArrayList<>();
+        ViewRow row = mock(ViewRow.class);
+        rows.add(row);
+
+
         when(factory.bucket()).thenReturn(bucket);
-        when(bucket.getView("TESTER", "findAll")).thenReturn(new View("", "", "findAll", false, false));
-        when(client.query(any(), any())).thenReturn(response);
-        when(response.iterator()).thenReturn(new ArrayList<ViewRow>().iterator());
+        when(bucket.bucketManager()).thenReturn(mgr);
+        when(mgr.getDesignDocument("TESTER")).thenReturn(design);
+        when(design.views()).thenReturn(views);
+        when(bucket.query(ViewQuery.from("TESTER", "findAll"))).thenReturn(result);
+        when(result.allRows()).thenReturn(rows);
     }
 
 

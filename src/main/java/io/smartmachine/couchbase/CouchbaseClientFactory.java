@@ -1,6 +1,7 @@
 package io.smartmachine.couchbase;
 
 import com.couchbase.client.java.AsyncBucket;
+import com.couchbase.client.java.Bucket;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.lifecycle.Managed;
 import io.smartmachine.couchbase.spi.CouchbaseDriver;
@@ -68,11 +69,11 @@ public class CouchbaseClientFactory implements Managed {
 
     public void stop() throws Exception {
         log.info("Disconnecting from Couchbase Cluster");
-        driver.close().get();
+        driver.close();
     }
 
 
-    public AsyncBucket bucket() {
+    public Bucket bucket() {
         return driver.bucket();
     }
 }
